@@ -1,0 +1,26 @@
+org: zmrfzn
+app: otel-sam
+service: otel-sam
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  tracing:
+    lambda: true
+    apiGateway: true
+
+functions:
+  api:
+    handler: index.handler
+    environment:
+        AWS_LAMBDA_EXEC_WRAPPER: opt/otel-handler
+        OPENTELEMETRY_COLLECTOR_CONFIG_FILE: https://adot-lambda-config.s3.amazonaws.com/config.yaml
+    events:
+      - httpApi: '*'
+    layers:
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-13-0:2
+
+plugins:
+  - serverless-offline
