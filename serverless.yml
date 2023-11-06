@@ -15,8 +15,12 @@ functions:
   api:
     handler: index.handler
     environment:
-        AWS_LAMBDA_EXEC_WRAPPER: opt/otel-handler
-        OPENTELEMETRY_COLLECTOR_CONFIG_FILE: https://adot-lambda-config.s3.amazonaws.com/config.yaml
+        AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+        OTEL_EXPORTER_OTLP_ENDPOINT: https://otlp.nr-data.net:4317
+        OTEL_EXPORTER_OTLP_HEADERS: 'api-key=${ssm:/nr_experiments_ingest_key}'
+        OTEL_SERVICE_NAME: otel-lambda-sls-otel-example
+        # https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node/opentelemetry-instrumentation-aws-lambda#aws-lambda-instrumentation-options
+        OTEL_LAMBDA_DISABLE_AWS_CONTEXT_PROPAGATION: true 
     events:
       - httpApi: '*'
     layers:
