@@ -1,15 +1,16 @@
 org: zmrfzn
-app: otel-sam
-service: otel-sam
+app: otel-sls-sdk-dev
+service: otel-sam-adot
 frameworkVersion: '3'
 
 provider:
   name: aws
   runtime: nodejs18.x
+  architecture: arm64
   region: us-east-1
   tracing:
-    lambda: true
-    apiGateway: true
+    lambda: false
+    apiGateway: false
 
 functions:
   api:
@@ -18,13 +19,20 @@ functions:
         AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
         OTEL_EXPORTER_OTLP_ENDPOINT: https://otlp.nr-data.net:4317
         OTEL_EXPORTER_OTLP_HEADERS: 'api-key=${ssm:/nr_experiments_ingest_key}'
-        OTEL_SERVICE_NAME: otel-lambda-sls-otel-example
+        OTEL_SERVICE_NAME: "Node-Lambda-ADOT"
         # https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node/opentelemetry-instrumentation-aws-lambda#aws-lambda-instrumentation-options
         OTEL_LAMBDA_DISABLE_AWS_CONTEXT_PROPAGATION: true 
+        EXPRESS_OTEL_API_ENDPOINT: 'http://3.230.230.121/v3/api'
     events:
       - httpApi: '*'
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-13-0:2
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-16-0:2
 
 plugins:
   - serverless-offline
+
+dashboard:
+  disableMonitoring: true
+
+package:
+  excludeDevDependencies: true
