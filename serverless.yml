@@ -1,16 +1,13 @@
 org: zmrfzn
-app: otel-sls-sdk-dev
-service: otel-sam-adot
+app: otel-sls-adot-dev
+service: otel-sls-adot
 frameworkVersion: '3'
 
 provider:
   name: aws
   runtime: nodejs18.x
-  architecture: arm64
+  # architecture: arm64
   region: us-east-1
-  tracing:
-    lambda: false
-    apiGateway: false
 
 functions:
   api:
@@ -26,7 +23,8 @@ functions:
     events:
       - httpApi: '*'
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-16-0:2
+      # - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-16-0:2
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-17-1:1
 
 plugins:
   - serverless-offline

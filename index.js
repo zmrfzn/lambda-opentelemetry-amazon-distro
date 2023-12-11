@@ -1,6 +1,10 @@
 const serverless = require("serverless-http");
 const express = require("express");
+const bodyParser = require('body-parser')
+
 const app = express();
+app.use(bodyParser.json())
+
 
 app.get("/", (req, res, next) => {
   return res.status(200).json({
@@ -14,9 +18,16 @@ app.get("/path", (req, res, next) => {
   });
 });
 
+// express post call to / and response with payload body if type is json and contains the key message or default to "Hello" 
+app.post("/", (req, res, next) => {
+  const message = req.body.message || "Hello from POST";
+  return res.status(200).json({
+    message: message,
+  });
+});
+
 const API_CONFIG = {
-  baseURL: "http://api.openweathermap.org/data/2.5",
-  TOKEN: "b06f7aeeae13ab893ca5409afa2ca384",
+  baseURL: process.env.EXPRESS_OTEL_API_ENDPOINT
 };
 
 app.get("/weather", (req, res) => {
@@ -24,7 +35,7 @@ app.get("/weather", (req, res) => {
 
   var config = {
     method: "get",
-    url: `${API_CONFIG.baseURL}/weather?q=${req.query.location}&appid=${API_CONFIG.TOKEN}`,
+    url: `${API_CONFIG.baseURL}/weather?location=${req.query.location}`,
     headers: {
       "Content-Type": "application/json",
     },
