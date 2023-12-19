@@ -6,12 +6,13 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs18.x
-  # architecture: arm64
   region: us-east-1
 
 functions:
   api:
     handler: index.handler
+    events:
+      - httpApi: '*'
     environment:
         # https://aws-otel.github.io/docs/getting-started/lambda/lambda-js#enable-auto-instrumentation-for-your-lambda-function
         AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
@@ -21,8 +22,6 @@ functions:
         # https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node/opentelemetry-instrumentation-aws-lambda#aws-lambda-instrumentation-options
         OTEL_LAMBDA_DISABLE_AWS_CONTEXT_PROPAGATION: true 
         EXPRESS_OTEL_API_ENDPOINT: 'http://3.230.230.121/v3/api'
-    events:
-      - httpApi: '*'
     layers:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-17-1:1
 
