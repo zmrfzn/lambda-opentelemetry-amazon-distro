@@ -1,4 +1,5 @@
 ## Table of contents 
+- [Overview](#overview)
 - [Serverless Framework Node Express API on AWS](#serverless-framework-node-express-api-on-aws)
   - [Anatomy of the template](#anatomy-of-the-template)
   - [Usage](#usage)
@@ -6,7 +7,8 @@
     - [Invocation](#invocation)
     - [Local development](#local-development)
 
-
+# Overview 
+Deploy a function with OpenTelemetry on Lambda via Amazon's Distro for OpenTelemetry(ADOT)
 
 # Serverless Framework Node Express API on AWS
 
