@@ -1,6 +1,6 @@
 org: zmrfzn
-app: otel-sls-adot-dev
-service: otel-sls-adot
+app: sls-nr-dev
+service: nr-layer-sls
 frameworkVersion: '3'
 
 provider:
@@ -10,23 +10,31 @@ provider:
 
 functions:
   api:
+    name: "Node-Lambda-NR_layer"
     handler: index.handler
     events:
       - httpApi: '*'
     environment:
-        # https://aws-otel.github.io/docs/getting-started/lambda/lambda-js#enable-auto-instrumentation-for-your-lambda-function
-        AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
-        OTEL_EXPORTER_OTLP_ENDPOINT: https://otlp.nr-data.net:4317
-        OTEL_EXPORTER_OTLP_HEADERS: 'api-key=${ssm:/nr_experiments_ingest_key}'
-        OTEL_SERVICE_NAME: "Node-Lambda-ADOT"
-        # https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node/opentelemetry-instrumentation-aws-lambda#aws-lambda-instrumentation-options
-        OTEL_LAMBDA_DISABLE_AWS_CONTEXT_PROPAGATION: true 
+        OTEL_SERVICE_NAME: "Node-Lambda-NR_layer"
         EXPRESS_OTEL_API_ENDPOINT: 'http://3.230.230.121/v3/api'
+        
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-17-1:1
+      - arn:aws:lambda:us-east-1:451483290750:layer:NewRelicNodeJS18X:84
 
 plugins:
   - serverless-offline
+  - serverless-newrelic-lambda-layers
+
+
+custom:
+  newRelic:
+    enableIntegration: true
+    accountId: 3680965
+    apiKey: '${ssm:/nr_experiments_ingest_key}'
+    enableFunctionLogs: true
+    enableExtension: true
+    logLevel: debug
+
 
 dashboard:
   disableMonitoring: true
