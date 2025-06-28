@@ -1,40 +1,75 @@
 org: zmrfzn
-app: sls-nr-dev
-service: nr-layer-sls
+app: otel-sls-adot-dev
+service: sls-adot-nodejs-otlpNR-20250628
 frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   region: us-east-1
+  architecture: arm64
+  tracing:
+    lambda: true
+    apiGateway: true
 
 functions:
   api:
-    name: "Node-Lambda-NR_layer"
     handler: index.handler
     events:
       - httpApi: '*'
     environment:
-        OTEL_SERVICE_NAME: "Node-Lambda-NR_layer"
-        EXPRESS_OTEL_API_ENDPOINT: 'http://3.230.230.121/v3/api'
-        
+        OTEL_SERVICE_NAME: "Node-Lambda-ADOT-2025"
+        # https://aws-otel.github.io/docs/getting-started/lambda/lambda-js#enable-auto-instrumentation-for-your-lambda-function
+        AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+        OTEL_EXPORTER_OTLP_ENDPOINT: https://otlp.nr-data.net:4317
+        OTEL_EXPORTER_OTLP_HEADERS: 'api-key=${ssm:/nr_experiments_ingest_key}'
+        # https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node/opentelemetry-instrumentation-aws-lambda#aws-lambda-instrumentation-options
+        OTEL_LAMBDA_DISABLE_AWS_CONTEXT_PROPAGATION: true 
+        OTEL_TRACES_SAMPLER: always_on
+        # OTEL_LOG_LEVEL: debug
+        # OPENTELEMETRY_COLLECTOR_CONFIG_URI: /var/task/config.yaml
+        API_GATEWAY_BASE_URL:
+            Fn::Sub: 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+        PROJECT_IDENTIFIER: git@github.com:zmrfzn/lambda-opentelemetry-amazon-distro.git
     layers:
-      - arn:aws:lambda:us-east-1:451483290750:layer:NewRelicNodeJS18X:84
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-1:1
+
+  catfacts:
+    handler: catfacts.handler
+    events:
+      - httpApi:
+          path: /catfacts
+          method: get
+    environment:
+        OTEL_SERVICE_NAME: "CatFacts-Lambda-ADOT"
+        AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+        OTEL_EXPORTER_OTLP_ENDPOINT: https://otlp.nr-data.net:4317
+        OTEL_EXPORTER_OTLP_HEADERS: 'api-key=${ssm:/nr_experiments_ingest_key}'
+        OTEL_LAMBDA_DISABLE_AWS_CONTEXT_PROPAGATION: true 
+        OTEL_TRACES_SAMPLER: always_on
+        # OPENTELEMETRY_COLLECTOR_CONFIG_URI: /var/task/config.yaml
+    layers:
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-1:1
+
+  subtasks:
+    handler: subtasks.handler
+    events:
+      - httpApi:
+          path: /subtasks
+          method: get
+    environment:
+        OTEL_SERVICE_NAME: "SubTasks-Lambda-ADOT"
+        AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+        OTEL_EXPORTER_OTLP_ENDPOINT: https://otlp.nr-data.net:4317
+        OTEL_EXPORTER_OTLP_HEADERS: 'api-key=${ssm:/nr_experiments_ingest_key}'
+        OTEL_LAMBDA_DISABLE_AWS_CONTEXT_PROPAGATION: true 
+        OTEL_TRACES_SAMPLER: always_on
+        # OPENTELEMETRY_COLLECTOR_CONFIG_URI: /var/task/config.yaml
+    layers:
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-1:1
 
 plugins:
   - serverless-offline
-  - serverless-newrelic-lambda-layers
-
-
-custom:
-  newRelic:
-    enableIntegration: true
-    accountId: 3680965
-    apiKey: '${ssm:/nr_experiments_ingest_key}'
-    enableFunctionLogs: true
-    enableExtension: true
-    logLevel: debug
-
 
 dashboard:
   disableMonitoring: true
