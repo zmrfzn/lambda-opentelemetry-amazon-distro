@@ -136,6 +136,22 @@ app.get("/randomcatfacts", async (req, res) => {
   }
 });
 
+app.get("/multihop", async (req, res) => {
+    // call subtasks then catfacts then microtasks and log the response
+    console.log("calling multihop route");
+    const subtasksResponse = await axios.get(`${process.env.API_GATEWAY_BASE_URL}/subtasks`);
+    const catfactsResponse = await axios.get(`${process.env.API_GATEWAY_BASE_URL}/catfacts`);
+    const microtasksResponse = await axios.get(`${process.env.API_GATEWAY_BASE_URL}/microtasks`);
+
+    
+    res.json({
+      subtasks: subtasksResponse.data,
+      catfacts: catfactsResponse.data,
+      microtasks: microtasksResponse.data,
+      service: 'multihop-service'
+    });
+});
+
 app.get("/microtasks", async (req, res) => {
   const microTasks = await performMicroTasks();
   res.json({
